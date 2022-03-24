@@ -2,6 +2,7 @@
 #include "Vector.h"
 #include <algorithm>
 #include <cmath>
+#include <ostream>
 
 using namespace std;
 Vector::Vector(const Value *rawArray, const size_t size, float coef) {
@@ -25,13 +26,13 @@ Vector::Vector(const Vector &other) {
 }
 
 Vector &Vector::operator=(const Vector &other) {
-    _data = new Value[other._capacity];
-    for (int i = 0; i < _size; ++i) {
-        _data[i] = other._data[i];
-    }
+    reserve(other._capacity);
     _size = other._size;
     _capacity = other._capacity;
     _multiplicativeCoef = other._multiplicativeCoef;
+    for (int i = 0; i < _size; ++i) {
+        _data[i] = other._data[i];
+    }
     return *this;
 }
 
@@ -64,8 +65,7 @@ Vector::~Vector() {
 
 void Vector::pushBack(const Value &value) {
     if (loadFactor() == 1) {
-        _capacity = (size_t)_multiplicativeCoef * _capacity;
-        _data = new Value[_capacity];
+        reserve(_capacity * (size_t)_multiplicativeCoef);
     }
     _data[_size] = value;
     _size++;
@@ -73,10 +73,9 @@ void Vector::pushBack(const Value &value) {
 
 void Vector::pushFront(const Value &value) {
     if (loadFactor() == 1) {
-        _capacity = (size_t)_multiplicativeCoef * _capacity;
-        _data = new Value[_capacity];
+        reserve(_capacity * (size_t)_multiplicativeCoef);
     }
-    for (size_t i = 1; i <= _size; ++i) {
+    for (size_t i = _size; i > 0; --i) {
         _data[i] = _data[i - 1];
     }
     _data[0] = value;
@@ -85,10 +84,9 @@ void Vector::pushFront(const Value &value) {
 
 void Vector::insert(const Value &value, size_t pos) {
     if (loadFactor() == 1) {
-        _capacity = (size_t)_multiplicativeCoef * _capacity;
-        _data = new Value[_capacity];
+        reserve(_capacity * (size_t)_multiplicativeCoef);
     }
-    for (size_t i = pos + 1; i <= _size; ++i) {
+    for (size_t i = _size; i >= pos + 1; --i) {
         _data[i] = _data[i - 1];
     }
     _data[pos] = value;
@@ -98,10 +96,9 @@ void Vector::insert(const Value &value, size_t pos) {
 void Vector::insert(const Value *values, size_t size, size_t pos) {
     _size += size;
     while (loadFactor() >= 1) {
-        _capacity = (size_t)_multiplicativeCoef * _capacity;
+        reserve(_capacity * (size_t)_multiplicativeCoef);
     }
-    _data = new Value[_capacity];
-    for (size_t i = pos + size; i <= _size; ++i) {
+    for (size_t i = _size; i >= pos + size; --i) {
         _data[i] = _data[i - size];
     }
     for (size_t i = 0; i < size; ++i) {
@@ -132,16 +129,17 @@ void Vector::popFront() {
 }
 
 void Vector::erase(size_t pos, size_t count) {
-    for (size_t i = pos; i < min(pos + count, _size); ++i) {
-        _data[i] = _data[i + pos];
+    for (size_t i = pos; i < max(pos + count, _size); ++i) {
+        _data[i] = _data[i + count];
     }
-    for (size_t i = 0; i < min((int)count, abs((int)_size - (int)pos - (int)count)); ++i) {
+    size_t size = _size;
+    for (size_t i = 0; i < min((int)count, abs((int)size - (int)pos)); ++i) {
         popBack();
     }
 }
 
 void Vector::eraseBetween(size_t beginPos, size_t endPos) {
-    erase(beginPos, endPos - beginPos + 1);
+    erase(beginPos, endPos - beginPos);
 }
 
 size_t Vector::size() const {
@@ -175,19 +173,36 @@ long long Vector::find(const Value &value) const {
 
 void Vector::reserve(size_t capacity) {
     if (capacity > _capacity) {
+        Value *v1 = new Value[capacity];
+        for (int i = 0; i < _size; i++)
+            v1[i] = _data[i];
         _data = new Value[capacity];
+        for (int i = 0; i < _size; i++)
+            _data[i] = v1[i];
+        delete[] v1;
         _capacity = capacity;
     }
 }
 
 void Vector::shrinkToFit() {
-    for (size_t i = 0; i < _capacity - _size; ++i) {
-        popBack();
+    Value *v = new Value[_size];
+    for (size_t i = 0; i < _size; ++i) {
+        v[i] = _data[i];
     }
     _data = new Value[_size];
+    for (size_t i = 0; i < _size; ++i) {
+        _data[i] = v[i];
+    }
     _capacity = _size;
+    delete[] v;
 }
 
-Value* Vector::get_data() {
-    return _data;
+ostream &operator<<(ostream &out, const Vector &v) {
+    out << "Size: " << v._size << endl;
+    out << "Capacity: " << v._capacity << endl;
+    out << "Vector: ";
+    for (size_t i = 0; i < v._size; ++i) {
+        out << v._data[i] << " ";
+    }
+    return out;
 }

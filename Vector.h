@@ -1,10 +1,9 @@
 #pragma once
-
-/// type of vector item
-///
+#include <ostream>
 #include <cstdio>
 
 using Value = double;
+using namespace std;
 
 class Vector
 {
@@ -117,9 +116,9 @@ public:
     */
     void shrinkToFit();
 
-    Value* get_data();
+    friend ostream& operator<<(ostream &out, const Vector& v);
 private:
-    Value* _data = nullptr;
+    Value* _data = new Value[1];
     size_t _size = 0;
     size_t _capacity = 1;
     float _multiplicativeCoef = 2.0f;
