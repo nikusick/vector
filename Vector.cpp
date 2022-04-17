@@ -7,7 +7,7 @@
 using namespace std;
 Vector::Vector(const Value *rawArray, const size_t size, float coef) {
     _size = size;
-    _capacity = size * (size_t) coef;
+    _capacity = size;
     _data = new Value[_capacity];
     for (size_t i = 0; i < size; ++i) {
         _data[i] = rawArray[i];
@@ -16,19 +16,19 @@ Vector::Vector(const Value *rawArray, const size_t size, float coef) {
 }
 
 Vector::Vector(const Vector &other) {
-    _data = new Value[other._capacity];
+    _size = other._size;
+    _capacity = other._size;
+    _multiplicativeCoef = other._multiplicativeCoef;
+    _data = new Value[_capacity];
     for (size_t i = 0; i < other._size; ++i) {
         _data[i] = other._data[i];
     }
-    _size = other._size;
-    _capacity = other._capacity;
-    _multiplicativeCoef = other._multiplicativeCoef;
 }
 
 Vector &Vector::operator=(const Vector &other) {
-    reserve(other._capacity);
+    reserve(other._size);
     _size = other._size;
-    _capacity = other._capacity;
+    _capacity = other._size;
     _multiplicativeCoef = other._multiplicativeCoef;
     for (int i = 0; i < _size; ++i) {
         _data[i] = other._data[i];
@@ -39,7 +39,7 @@ Vector &Vector::operator=(const Vector &other) {
 Vector::Vector(Vector &&other) noexcept {
     _data = other._data;
     _size = other._size;
-    _capacity = other._capacity;
+    _capacity = other._size;
     _multiplicativeCoef = other._multiplicativeCoef;
     other._data = nullptr;
     other._size = 0;
@@ -50,7 +50,7 @@ Vector::Vector(Vector &&other) noexcept {
 Vector &Vector::operator=(Vector &&other) noexcept {
     _data = other._data;
     _size = other._size;
-    _capacity = other._capacity;
+    _capacity = other._size;
     _multiplicativeCoef = other._multiplicativeCoef;
     other._data = nullptr;
     other._size = 0;
@@ -64,7 +64,10 @@ Vector::~Vector() {
 }
 
 void Vector::pushBack(const Value &value) {
-    if (loadFactor() == 1) {
+    if (_capacity == 0){
+        reserve(_capacity + 1);
+    }
+    if (loadFactor() == 1 || _size == 0) {
         reserve(_capacity * (size_t)_multiplicativeCoef);
     }
     _data[_size] = value;
@@ -72,7 +75,10 @@ void Vector::pushBack(const Value &value) {
 }
 
 void Vector::pushFront(const Value &value) {
-    if (loadFactor() == 1) {
+    if (_capacity == 0){
+        reserve(_capacity + 1);
+    }
+    if (loadFactor() == 1 || _size == 0) {
         reserve(_capacity * (size_t)_multiplicativeCoef);
     }
     for (size_t i = _size; i > 0; --i) {
@@ -83,6 +89,9 @@ void Vector::pushFront(const Value &value) {
 }
 
 void Vector::insert(const Value &value, size_t pos) {
+    if (_capacity == 0){
+        reserve(_capacity + 1);
+    }
     if (loadFactor() == 1) {
         reserve(_capacity * (size_t)_multiplicativeCoef);
     }
@@ -95,6 +104,9 @@ void Vector::insert(const Value &value, size_t pos) {
 
 void Vector::insert(const Value *values, size_t size, size_t pos) {
     _size += size;
+    if (_capacity == 0){
+        reserve(_capacity + 1);
+    }
     while (loadFactor() >= 1) {
         reserve(_capacity * (size_t)_multiplicativeCoef);
     }
@@ -112,7 +124,7 @@ void Vector::insert(const Vector &vector, size_t pos) {
 
 void Vector::popBack() {
     if (_size == 0) {
-        return;
+        throw out_of_range("_size = 0");
     }
     _size--;
     _data[_size].~Value();
@@ -120,7 +132,7 @@ void Vector::popBack() {
 
 void Vector::popFront() {
     if (_size == 0) {
-        return;
+        throw out_of_range("_size = 0");
     }
     for (size_t i = 0; i < _size - 1; ++i) {
         _data[i] = _data[i + 1];
@@ -129,12 +141,15 @@ void Vector::popFront() {
 }
 
 void Vector::erase(size_t pos, size_t count) {
-    for (size_t i = pos; i < max(pos + count, _size); ++i) {
-        _data[i] = _data[i + count];
-    }
     size_t size = _size;
-    for (size_t i = 0; i < min((int)count, abs((int)size - (int)pos)); ++i) {
-        popBack();
+    if (pos + count >= size) {
+        _size -= _size - pos;
+    }
+    else {
+        for (size_t i = pos; i < size - count; ++i){
+            _data[i] = _data[i + count];
+        }
+        _size -= count;
     }
 }
 
@@ -151,7 +166,7 @@ size_t Vector::capacity() const {
 }
 
 double Vector::loadFactor() const {
-    return _size / _capacity;
+    return (double)_size / (double)_capacity;
 }
 
 Value &Vector::operator[](size_t idx) {
@@ -174,35 +189,73 @@ long long Vector::find(const Value &value) const {
 void Vector::reserve(size_t capacity) {
     if (capacity > _capacity) {
         Value *v1 = new Value[capacity];
-        for (int i = 0; i < _size; i++)
-            v1[i] = _data[i];
-        _data = new Value[capacity];
-        for (int i = 0; i < _size; i++)
-            _data[i] = v1[i];
-        delete[] v1;
+        if (_data != nullptr) {
+            for (int i = 0; i < _size; i++)
+                v1[i] = _data[i];
+            delete[] _data;
+
+        }
+        _data = v1;
         _capacity = capacity;
     }
 }
 
 void Vector::shrinkToFit() {
     Value *v = new Value[_size];
-    for (size_t i = 0; i < _size; ++i) {
-        v[i] = _data[i];
+    if (_data != nullptr) {
+        for (size_t i = 0; i < _size; ++i) {
+            v[i] = _data[i];
+        }
+        delete[] _data;
     }
-    _data = new Value[_size];
-    for (size_t i = 0; i < _size; ++i) {
-        _data[i] = v[i];
-    }
+    _data = v;
     _capacity = _size;
-    delete[] v;
 }
 
-ostream &operator<<(ostream &out, const Vector &v) {
-    out << "Size: " << v._size << endl;
-    out << "Capacity: " << v._capacity << endl;
-    out << "Vector: ";
-    for (size_t i = 0; i < v._size; ++i) {
-        out << v._data[i] << " ";
-    }
-    return out;
+
+Vector::Iterator Vector::begin() {
+    return Vector::Iterator((int*)(&_data[0]));
 }
+
+Vector::Iterator Vector::end() {
+    return Vector::Iterator((int*)(&_data[_size]));
+}
+
+Vector::Iterator::Iterator(int *ptr) : _ptr(ptr)
+{}
+
+int &Vector::Iterator::operator*() {
+    return *_ptr;
+}
+
+const int &Vector::Iterator::operator*() const {
+    return *_ptr;
+}
+
+int *Vector::Iterator::operator->() {
+    return _ptr;
+}
+
+const int *Vector::Iterator::operator->() const {
+    return _ptr;
+}
+
+Vector::Iterator Vector::Iterator::operator++() {
+    ++_ptr;
+    return *this;
+}
+
+Vector::Iterator Vector::Iterator::operator++(int num) {
+    Vector::Iterator it = *this;
+    ++(*this);
+    return it;
+}
+
+bool Vector::Iterator::operator==(const Vector::Iterator &other) const {
+    return _ptr == other._ptr;
+}
+
+bool Vector::Iterator::operator!=(const Vector::Iterator &other) const {
+    return _ptr != other._ptr;
+}
+

@@ -1,82 +1,30 @@
 #include <iostream>
+#include <vector>
 #include "Vector.h"
 
 using namespace std;
 
 int main() {
-    Vector v;
-    cout << "-----------------------" << endl;
-    cout << "Vector v;" << endl;
-    cout << v << endl;
     Value arr[3] = {1, 2, 3};
-    Vector *v1 = new Vector(arr, 3);
-    cout << "-----------------------" << endl;
-    cout << "Value arr[3] = {1, 2, 3};\n"
-            "Vector *v1 = new Vector(arr, 3);" << endl;
-    cout << *v1 << endl;
+    Vector *v1 = new Vector(arr, 3, 2.0f);
     Vector *v2 = new Vector(*v1);
-    cout << "-----------------------" << endl;
-    cout << "Vector *v2 = new Vector(*v1);" << endl;
-    cout << *v2 << endl;
-    v = *v2;
-    cout << "-----------------------" << endl;
-    cout << "v = *v2;" << endl;
-    cout << v << endl;
-    v.pushBack(4);
-    cout << "-----------------------" << endl;
-    cout << "v.pushBack(4);" << endl;
-    cout << v << endl;
-    v.pushFront(0);
-    cout << "-----------------------" << endl;
-    cout << "v.pushFront(0);" << endl;
-    cout << v << endl;
-    v.insert(1.5, 2);
-    cout << "-----------------------" << endl;
-    cout << "v.insert(1.5, 2);" << endl;
-    cout << v << endl;
-    v.insert(arr, 3, 1);
-    cout << "-----------------------" << endl;
-    cout << "v.insert(arr, 3, 1);" << endl;
-    cout << v << endl;
-    v.insert(*v1, 1);
-    cout << "-----------------------" << endl;
-    cout << "v.insert(*v1, 1);" << endl;
-    cout << v << endl;
-    v.popBack();
-    cout << "-----------------------" << endl;
-    cout << "v.popBack();" << endl;
-    cout << v << endl;
-    v.popFront();
-    cout << "-----------------------" << endl;
-    cout << "v.popFront();" << endl;
-    cout << v << endl;
-    v.erase(0, 3);
-    cout << "-----------------------" << endl;
-    cout << "v.erase(0, 3);" << endl;
-    cout << v << endl;
-    v.erase(5, 5);
-    cout << "-----------------------" << endl;
-    cout << "v.erase(5, 5);" << endl;
-    cout << v << endl;
-    v.eraseBetween(1, 3);
-    cout << "-----------------------" << endl;
-    cout << "v.eraseBetween(1, 3);" << endl;
-    cout << v << endl;
-    cout << "-----------------------" << endl;
-    cout << "cout << v[2] << endl;" << endl;
-    cout << v[2] << endl;
-    cout << "-----------------------" << endl;
-    cout << "cout << v.find(1) << endl;" << endl;
-    cout << v.find(1) << endl;
-    cout << "-----------------------" << endl;
-    cout << "cout << v.find(1.5) << endl;" << endl;
-    cout << v.find(1.5) << endl;
+    Vector v;
+    for (int i = 0; i < 20; ++i) {
+        v.pushBack(i);
+    }
+    cout << v.size() << " " << v.capacity() << endl;
+    for (int i = 0; i < 19; ++i) {
+        v.popFront();
+    }
+    cout << v.size() << " " << v.capacity() << endl;
     v.shrinkToFit();
-    cout << "-----------------------" << endl;
-    cout << " v.shrinkToFit();" << endl;
-    cout << v << endl;
-    cout << "-----------------------" << endl;
-    delete v1;
-    delete v2;
+    cout << v.size() << " " << v.capacity() << endl;
+    v.popFront();
+    v.popFront();
+    v.shrinkToFit();
+    cout << v.size() << " " << v.capacity() << endl;
+    v.pushBack(1);
+    cout << v.size() << " " << v.capacity() << endl;
+    delete v1, v2;
     return 0;
 }

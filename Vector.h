@@ -1,9 +1,6 @@
 #pragma once
-#include <ostream>
-#include <cstdio>
 
 using Value = double;
-using namespace std;
 
 class Vector
 {
@@ -116,11 +113,34 @@ public:
     */
     void shrinkToFit();
 
-    friend ostream& operator<<(ostream &out, const Vector& v);
+    class Iterator
+    {
+        int* _ptr;
+    public:
+        explicit Iterator(int* ptr);
+
+        int& operator*();
+
+        const int& operator*() const;
+
+        int* operator->();
+
+        const int* operator->() const;
+
+        Iterator operator++();
+
+        Iterator operator++(int);
+
+        bool operator==(const Iterator& other) const;
+
+        bool operator!=(const Iterator& other) const;
+    };
+
+    Iterator begin();
+    Iterator end();
 private:
-    Value* _data = new Value[1];
+    Value* _data = nullptr;
     size_t _size = 0;
-    size_t _capacity = 1;
+    size_t _capacity = 0;
     float _multiplicativeCoef = 2.0f;
 };
-
