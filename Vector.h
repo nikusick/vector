@@ -115,17 +115,17 @@ public:
 
     class Iterator
     {
-        int* _ptr;
+        Value* _ptr;
     public:
-        explicit Iterator(int* ptr);
+        explicit Iterator(Value * ptr);
 
-        int& operator*();
+        Value& operator*();
 
-        const int& operator*() const;
+        const Value& operator*() const;
 
-        int* operator->();
+        Value* operator->();
 
-        const int* operator->() const;
+        const Value* operator->() const;
 
         Iterator operator++();
 

@@ -9,22 +9,12 @@ int main() {
     Vector *v1 = new Vector(arr, 3, 2.0f);
     Vector *v2 = new Vector(*v1);
     Vector v;
-    for (int i = 0; i < 20; ++i) {
-        v.pushBack(i);
+    v1->insert(arr, 3,2);
+    cout << v1->size() << " " << v1->capacity() << endl;
+    v1->erase(1, 6);
+    for (auto&& item : *v1) {
+        cout << item;
     }
-    cout << v.size() << " " << v.capacity() << endl;
-    for (int i = 0; i < 19; ++i) {
-        v.popFront();
-    }
-    cout << v.size() << " " << v.capacity() << endl;
-    v.shrinkToFit();
-    cout << v.size() << " " << v.capacity() << endl;
-    v.popFront();
-    v.popFront();
-    v.shrinkToFit();
-    cout << v.size() << " " << v.capacity() << endl;
-    v.pushBack(1);
-    cout << v.size() << " " << v.capacity() << endl;
     delete v1, v2;
     return 0;
 }
