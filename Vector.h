@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdio>
+
 using Value = double;
 
 class Vector
