@@ -1,3 +1,0 @@
-C:/Users/nikas/CLionProjects/vector_1/cmake-build-debug/CMakeFiles/untitled3.dir
-C:/Users/nikas/CLionProjects/vector_1/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/nikas/CLionProjects/vector_1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
